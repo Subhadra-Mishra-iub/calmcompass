@@ -3,29 +3,37 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Public routes - no auth check needed
-  const publicRoutes = ['/login', '/signup', '/', '/api/auth'];
-  const isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith('/api/auth')
-  );
-
-  // Protected routes - check for session token in cookies
-  if (!isPublicRoute) {
-    const sessionToken = request.cookies.get('authjs.session-token') || 
-                        request.cookies.get('__Secure-authjs.session-token');
-    
-    if (!sessionToken) {
-      // Redirect to login if no session token
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  
+  // Public routes that don't need authentication
+  const publicRoutes = ['/login', '/signup', '/'];
+  const isPublicRoute = pathname === '/' || 
+                       pathname === '/login' || 
+                       pathname === '/signup' || 
+                       pathname.startsWith('/api/auth');
+  
+  // For API routes, let them handle auth themselves
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
   }
 
-  // Redirect logged-in users away from login/signup
-  const sessionToken = request.cookies.get('authjs.session-token') || 
-                      request.cookies.get('__Secure-authjs.session-token');
+  // Check for NextAuth session cookie
+  // NextAuth v5 uses different cookie names
+  const sessionCookie = request.cookies.get('authjs.session-token') ||
+                        request.cookies.get('__Secure-authjs.session-token') ||
+                        request.cookies.get('next-auth.session-token') ||
+                        request.cookies.get('__Secure-next-auth.session-token');
   
-  if (sessionToken && (pathname === '/login' || pathname === '/signup')) {
+  const hasSession = !!sessionCookie;
+
+  // Redirect to login if accessing protected route without session
+  if (!isPublicRoute && !hasSession) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect logged-in users away from login/signup to dashboard
+  if (hasSession && (pathname === '/login' || pathname === '/signup')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -33,6 +41,16 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - icon.svg (icon file)
+     * - public folder files
+     */
+    '/((?!_next/static|_next/image|favicon.ico|icon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
 
