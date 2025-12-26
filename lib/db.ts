@@ -6,12 +6,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function createPrismaClient() {
+let dbInstance: PrismaClient | null = null;
+
+function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    console.error('DATABASE_URL environment variable is not set');
-    throw new Error('DATABASE_URL environment variable is not set');
+    const error = new Error('DATABASE_URL environment variable is not set');
+    console.error('[DB] Error:', error.message);
+    throw error;
   }
 
   try {
@@ -23,12 +26,32 @@ function createPrismaClient() {
       log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
   } catch (error) {
-    console.error('Failed to create Prisma client:', error);
+    console.error('[DB] Failed to create Prisma client:', error);
     throw error;
   }
 }
 
-export const db =
-  globalForPrisma.prisma ?? createPrismaClient();
+function getDb(): PrismaClient {
+  if (dbInstance) {
+    return dbInstance;
+  }
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+  if (globalForPrisma.prisma) {
+    dbInstance = globalForPrisma.prisma;
+    return dbInstance;
+  }
+
+  dbInstance = createPrismaClient();
+  
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = dbInstance;
+  }
+
+  return dbInstance;
+}
+
+export const db = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    return getDb()[prop as keyof PrismaClient];
+  },
+});
