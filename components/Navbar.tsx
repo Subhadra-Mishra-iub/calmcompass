@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 
 interface NavbarProps {
@@ -10,12 +10,15 @@ interface NavbarProps {
 
 export default function Navbar({ userName }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push('/');
     router.refresh();
   };
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -28,19 +31,31 @@ export default function Navbar({ userName }: NavbarProps) {
             <div className="ml-10 flex space-x-4">
               <Link
                 href="/dashboard"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/dashboard')
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-700 hover:text-indigo-600'
+                }`}
               >
                 Dashboard
               </Link>
               <Link
                 href="/emotions"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/emotions')
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-700 hover:text-indigo-600'
+                }`}
               >
                 Emotions
               </Link>
               <Link
                 href="/history"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/history')
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-700 hover:text-indigo-600'
+                }`}
               >
                 History
               </Link>
@@ -48,7 +63,7 @@ export default function Navbar({ userName }: NavbarProps) {
           </div>
           <div className="flex items-center space-x-4">
             {userName && (
-              <span className="text-sm text-gray-700">{userName}</span>
+              <span className="text-sm text-gray-900">{userName}</span>
             )}
             <button
               onClick={handleSignOut}
