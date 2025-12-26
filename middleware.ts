@@ -1,28 +1,38 @@
-import { auth } from './auth';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  // Public routes
-  const publicRoutes = ['/login', '/signup', '/'];
-  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith('/api/auth'));
+  // Public routes - no auth check needed
+  const publicRoutes = ['/login', '/signup', '/', '/api/auth'];
+  const isPublicRoute = publicRoutes.some(route => 
+    pathname === route || pathname.startsWith('/api/auth')
+  );
 
-  // Redirect to login if trying to access protected route while not logged in
-  if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/login', req.url));
+  // Protected routes - check for session token in cookies
+  if (!isPublicRoute) {
+    const sessionToken = request.cookies.get('authjs.session-token') || 
+                        request.cookies.get('__Secure-authjs.session-token');
+    
+    if (!sessionToken) {
+      // Redirect to login if no session token
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
-  // Redirect to dashboard if logged in and trying to access login/signup
-  if (isLoggedIn && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
+  // Redirect logged-in users away from login/signup
+  const sessionToken = request.cookies.get('authjs.session-token') || 
+                      request.cookies.get('__Secure-authjs.session-token');
+  
+  if (sessionToken && (pathname === '/login' || pathname === '/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg).*)'],
 };
 
