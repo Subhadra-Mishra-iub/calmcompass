@@ -6,8 +6,6 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-let dbInstance: PrismaClient | null = null;
-
 function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
 
@@ -31,27 +29,7 @@ function createPrismaClient(): PrismaClient {
   }
 }
 
-function getDb(): PrismaClient {
-  if (dbInstance) {
-    return dbInstance;
-  }
+export const db =
+  globalForPrisma.prisma ?? createPrismaClient();
 
-  if (globalForPrisma.prisma) {
-    dbInstance = globalForPrisma.prisma;
-    return dbInstance;
-  }
-
-  dbInstance = createPrismaClient();
-  
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = dbInstance;
-  }
-
-  return dbInstance;
-}
-
-export const db = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    return getDb()[prop as keyof PrismaClient];
-  },
-});
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
