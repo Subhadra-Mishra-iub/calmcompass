@@ -179,7 +179,7 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
               value={newEmotionName}
               onChange={(e) => setNewEmotionName(e.target.value)}
               placeholder="Emotion name (e.g., Anxious, Happy, Stressed)"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder:text-gray-400"
               autoFocus
             />
             <button
@@ -247,21 +247,21 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
                         value={newAction.title}
                         onChange={(e) => setNewAction({ ...newAction, title: e.target.value })}
                         placeholder="Action title (required)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder:text-gray-400"
                       />
                       <textarea
                         value={newAction.description}
                         onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
                         placeholder="Description (optional)"
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder:text-gray-400"
                       />
                       <input
                         type="url"
                         value={newAction.url}
                         onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
                         placeholder="URL (optional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder:text-gray-400"
                       />
                       <button
                         onClick={() => handleAddAction(emotion.id)}
