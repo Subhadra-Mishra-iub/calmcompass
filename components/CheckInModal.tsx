@@ -135,13 +135,23 @@ export default function CheckInModal({ isOpen, onClose, onComplete, userId }: Ch
             </label>
             {loadingEmotions ? (
               <div className="text-gray-500">Loading emotions...</div>
+            ) : emotions.length === 0 ? (
+              <div className="p-4 border border-gray-300 rounded-md bg-gray-50">
+                <p className="text-gray-700 mb-2">No emotions found. Create emotions first to track your check-ins.</p>
+                <a
+                  href="/emotions"
+                  className="text-indigo-600 hover:text-indigo-700 underline"
+                >
+                  Go to Emotions page →
+                </a>
+              </div>
             ) : (
               <select
                 id="emotion"
                 value={selectedEmotionId}
                 onChange={(e) => setSelectedEmotionId(e.target.value)}
                 required
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               >
                 <option value="">Choose an emotion...</option>
                 {emotions.map((emotion) => (
@@ -191,7 +201,7 @@ export default function CheckInModal({ isOpen, onClose, onComplete, userId }: Ch
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 placeholder:text-gray-400"
               placeholder="How are you feeling? What's on your mind?"
             />
           </div>
