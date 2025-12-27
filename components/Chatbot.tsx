@@ -107,7 +107,7 @@ export default function Chatbot() {
         <h3 className="font-semibold">CalmCompass Assistant</h3>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-white hover:text-gray-200 text-xl font-bold leading-none w-6 h-6 flex items-center justify-center"
+          className="text-white hover:text-gray-200 text-xl font-bold leading-none w-6 h-6 flex items-center justify-center cursor-pointer"
           aria-label="Close chat"
         >
           ×
