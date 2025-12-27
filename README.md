@@ -20,11 +20,11 @@ This application enables users to:
 ## Features
 
 - 🔐 **Secure Authentication**: Email/password authentication with bcrypt password hashing
-- 😊 **Emotion Management**: Create and manage custom emotions with visual indicators
-- ✅ **Action Tracking**: Associate helpful actions with emotions, track creation dates
+- 😊 **Emotion Management**: Create and manage custom emotions with visual indicators and action counts
+- ✅ **Action Tracking**: Associate helpful actions with emotions, track creation dates, collapsible action details
 - 📝 **Daily Check-ins**: Quick check-ins to record emotional state with optional notes
-- 📊 **History & Analytics**: View past check-ins with filtering by emotion and date range
-- 🤖 **AI Chatbot**: Personalized emotional support chatbot powered by Groq AI
+- 📊 **History & Analytics**: View past check-ins with filtering by emotion and date range, collapsible entries
+- 🤖 **AI Chatbot**: Personalized emotional support chatbot powered by Groq AI, providing recommendations based on check-in history and associated actions
 - 📱 **Responsive Design**: Seamless experience across desktop and mobile devices
 - 🎨 **Modern UI**: Clean, intuitive interface built with Tailwind CSS
 
