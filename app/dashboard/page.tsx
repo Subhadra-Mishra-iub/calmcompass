@@ -24,6 +24,15 @@ export default async function DashboardPage() {
           </p>
         </div>
         <CheckInButton userId={session.user.id} />
+        
+        <div className="mt-8 max-w-2xl mx-auto">
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-indigo-900">
+              <span className="font-semibold">💬 Chat with our AI Assistant!</span> 
+              {' '}Create some emotions and check-ins to get personalized support and recommendations based on your emotional patterns. Look for the chat icon in the bottom-right corner.
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   );
