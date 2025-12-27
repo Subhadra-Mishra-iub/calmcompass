@@ -21,18 +21,20 @@ export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Don't render chatbot if user is not logged in
-  if (!session) {
-    return null;
-  }
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (session) {
+      scrollToBottom();
+    }
+  }, [messages, session]);
+
+  // Don't render chatbot if user is not logged in
+  if (!session) {
+    return null;
+  }
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
