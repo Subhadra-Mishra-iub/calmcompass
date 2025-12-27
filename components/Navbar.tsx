@@ -67,7 +67,7 @@ export default function Navbar({ userName }: NavbarProps) {
             )}
             <button
               onClick={handleSignOut}
-              className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+              className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer"
             >
               Sign Out
             </button>
