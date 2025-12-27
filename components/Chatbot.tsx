@@ -9,7 +9,7 @@ interface Message {
 }
 
 export default function Chatbot() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
@@ -31,8 +31,8 @@ export default function Chatbot() {
     }
   }, [messages, session]);
 
-  // Don't render chatbot if user is not logged in
-  if (!session) {
+  // Don't render chatbot if session is loading or user is not logged in
+  if (status === 'loading' || !session) {
     return null;
   }
 
