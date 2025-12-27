@@ -33,6 +33,10 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
   const fetchEmotions = useCallback(async () => {
     try {
       const response = await fetch(`/api/emotions?userId=${userId}`);
+      if (!response.ok) {
+        console.error('Failed to fetch emotions:', response.status);
+        return;
+      }
       const data = await response.json();
       
       // Fetch actions for each emotion
@@ -40,6 +44,13 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
         (data.emotions || []).map(async (emotion: { id: string; name: string }) => {
           try {
             const actionsResponse = await fetch(`/api/actions?emotionId=${emotion.id}`);
+            if (!actionsResponse.ok) {
+              console.error(`Failed to fetch actions for emotion ${emotion.id}:`, actionsResponse.status);
+              return {
+                ...emotion,
+                actions: [],
+              };
+            }
             const actionsData = await actionsResponse.json();
             return {
               ...emotion,
