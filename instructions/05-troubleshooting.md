@@ -178,3 +178,4 @@ npm run db:seed  # Add sample data
 npm run dev      # Start the app
 ```
 
+

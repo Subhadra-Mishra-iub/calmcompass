@@ -132,3 +132,4 @@ npm run dev      # Start the app
 - ✅ Use environment variables in production (Vercel)
 - ✅ Keep your database password secure
 
+

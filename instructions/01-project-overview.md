@@ -86,3 +86,4 @@ The application uses PostgreSQL with the following schema:
 
 See `prisma/schema.prisma` for the complete schema definition.
 
+

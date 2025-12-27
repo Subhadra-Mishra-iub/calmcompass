@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Emotion {
@@ -30,11 +30,7 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
   const [editingAction, setEditingAction] = useState<string | null>(null);
   const [newAction, setNewAction] = useState({ title: '', description: '', url: '' });
 
-  useEffect(() => {
-    fetchEmotions();
-  }, [userId]);
-
-  const fetchEmotions = async () => {
+  const fetchEmotions = useCallback(async () => {
     try {
       const response = await fetch(`/api/emotions?userId=${userId}`);
       const data = await response.json();
@@ -57,7 +53,11 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchEmotions();
+  }, [fetchEmotions]);
 
   const handleAddEmotion = async (e: React.FormEvent) => {
     e.preventDefault();
