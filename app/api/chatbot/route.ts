@@ -283,23 +283,17 @@ async function generateFallbackResponse(
     .map(checkIn => formatDate(checkIn.createdAt))
     .join(', ');
 
-    const completedActions = new Set<string>();
-    pastCheckIns.forEach(checkIn => {
-      checkIn.checkInActions
-        .filter((cia: any) => cia.completed)
-        .forEach((cia: any) => {
-          completedActions.add(cia.action.title);
-        });
-    });
-    const actionList = Array.from(completedActions).slice(0, 3);
+  const completedActions = new Set<string>();
+  pastCheckIns.forEach(checkIn => {
+    checkIn.checkInActions
+      .filter((cia: any) => cia.completed)
+      .forEach((cia: any) => {
+        completedActions.add(cia.action.title);
+      });
+  });
+  const actionList = Array.from(completedActions).slice(0, 3);
 
-    // Get actions associated with this emotion for fallback
-    const emotionActions = await db.action.findMany({
-      where: { emotionId: mentionedEmotion.id },
-      select: { title: true },
-    });
-
-    const emotionLower = mentionedEmotion.name.toLowerCase();
+  const emotionLower = mentionedEmotion.name.toLowerCase();
     
     if (emotionLower.includes('happy') || emotionLower.includes('joy') || emotionLower.includes('good')) {
     let response = `Great to hear you're feeling ${mentionedEmotion.name} today! `;
