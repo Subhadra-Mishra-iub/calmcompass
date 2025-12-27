@@ -146,6 +146,12 @@ Supabase was chosen as the database solution for several key reasons:
    - Export check-ins as CSV/JSON
    - Data portability for users
 
+7. **AI-Powered Chatbot**
+   - Emotional support and guidance
+   - Personalized recommendations based on check-in history
+   - Help users understand their emotional patterns
+   - Provide actionable advice and resources
+
 **Low Priority / Nice to Have:**
 
 7. **Emotion Colors/Icons**

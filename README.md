@@ -1,18 +1,28 @@
 # CalmCompass
 
-A modern web application for tracking emotional well-being through daily check-ins, emotion management, and actionable insights.
+> **🌐 Live Website**: [Visit CalmCompass](https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app)
+
+A modern web application designed to help individuals track their emotional well-being through daily check-ins, personalized emotion management, and actionable insights.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Overview
+## About
 
-CalmCompass helps users track their emotional state daily, manage personalized emotions and associated actions, and review patterns over time. Built with modern web technologies and deployed on free-tier infrastructure, it's accessible to anyone.
+CalmCompass was created to address the need for a simple, private, and user-friendly tool for emotional well-being tracking. Many people struggle to understand their emotional patterns, but existing solutions are often too complex, lack privacy, or don't provide actionable guidance.
+
+This application empowers users to:
+- **Track daily emotions** - Record how you're feeling each day with quick, intuitive check-ins
+- **Build emotional awareness** - Understand patterns in your emotional state over time
+- **Take actionable steps** - Associate helpful actions with each emotion to guide yourself toward better well-being
+- **Maintain privacy** - Your data stays private and secure, controlled entirely by you
+
+Built with modern web technologies and deployed on free-tier infrastructure, CalmCompass is accessible to anyone who wants to better understand and manage their emotional health.
 
 ## Features
 
 - 🔐 **Secure Authentication**: Sign up and login with email/password (passwords are hashed with bcrypt)
 - 😊 **Emotion Management**: Create and manage custom emotions (e.g., "Anxious", "Happy", "Stressed")
-- ✅ **Action Tracking**: Associate helpful actions with each emotion
+- ✅ **Action Tracking**: Associate helpful actions with each emotion to guide your response
 - 📝 **Daily Check-ins**: Quick check-ins to record your current emotional state with optional notes
 - 📊 **History & Analytics**: View past check-ins with filtering by emotion and date range
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
@@ -125,6 +135,8 @@ See `prisma/schema.prisma` for the complete schema definition.
 
 The application is designed to be deployed to Vercel (hosting) and Supabase (database), both offering generous free tiers.
 
+**🌐 Live Website**: [https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app](https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app)
+
 For detailed deployment instructions, see [instructions/04-deployment-guide.md](./instructions/04-deployment-guide.md).
 
 ### Quick Deployment Steps
@@ -171,12 +183,14 @@ This project is currently at MVP stage. Planned enhancements include:
 - Emotion trends over time visualization
 - Action completion rate tracking
 - Data export functionality (CSV/JSON)
+- AI-powered chatbot for emotional support and guidance
 
 **Low Priority:**
 - Emotion colors and icons for visual representation
 - Daily check-in reminders
 - Dark mode theme toggle
 - Advanced search and filtering capabilities
+- Mobile app version (React Native)
 
 For more details on development decisions and future plans, see [instructions/06-development-notes.md](./instructions/06-development-notes.md).
 
