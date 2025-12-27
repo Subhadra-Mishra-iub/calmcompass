@@ -52,40 +52,22 @@ export async function POST(request: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Extract emotion from message
+    // Extract emotion from message - ONLY check emotions that exist in user's profile
     const messageLower = message.toLowerCase();
     let mentionedEmotion: { id: string; name: string } | null = null;
     
-    // Try to find exact emotion match
+    // Only try to find exact emotion match from user's actual emotions
     for (const emotion of emotions) {
-      if (messageLower.includes(emotion.name.toLowerCase())) {
+      const emotionNameLower = emotion.name.toLowerCase();
+      // Check if message contains the emotion name
+      if (messageLower.includes(emotionNameLower)) {
         mentionedEmotion = emotion;
         break;
       }
     }
 
-    // If no exact match, try common emotion keywords
-    if (!mentionedEmotion) {
-      const emotionKeywords: Record<string, string[]> = {
-        happy: ['happy', 'joy', 'joyful', 'glad', 'cheerful', 'excited', 'great'],
-        sad: ['sad', 'down', 'depressed', 'unhappy', 'blue', 'melancholy'],
-        anxious: ['anxious', 'worried', 'nervous', 'stressed', 'tense'],
-        angry: ['angry', 'mad', 'furious', 'irritated', 'annoyed'],
-        stressed: ['stressed', 'overwhelmed', 'pressured', 'burned out'],
-      };
-
-      for (const [emotionName, keywords] of Object.entries(emotionKeywords)) {
-        if (keywords.some(keyword => messageLower.includes(keyword))) {
-          const foundEmotion = emotions.find(
-            e => e.name.toLowerCase() === emotionName
-          );
-          if (foundEmotion) {
-            mentionedEmotion = foundEmotion;
-            break;
-          }
-        }
-      }
-    }
+    // Note: We removed the keyword matching fallback to prevent false assumptions
+    // We only respond about emotions that actually exist in the user's profile
 
     // Prepare context for AI
     let context = '';
@@ -169,9 +151,9 @@ export async function POST(request: Request) {
         }
         const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain');
         const wordLimit = wantsMoreDetail ? '100 words' : '50 words';
-        context += `Generate a helpful, supportive response. Keep it conversational and under ${wordLimit}. Be concise and fact-based.`;
+        context += `Generate a helpful, supportive response. Keep it conversational and under ${wordLimit}. Be concise and fact-based. Only mention emotions and check-ins that actually exist in their profile.`;
       } else {
-        context = `User message: "${message}". This user has no check-in history yet. Welcome them and encourage them to start tracking their emotions. Keep it friendly and under 50 words. Be concise.`;
+        context = `User message: "${message}". This user has no check-in history yet. Welcome them and encourage them to start tracking their emotions by creating emotions and check-ins. Keep it friendly and under 50 words. Be concise. Do not assume they have any emotions or check-ins.`;
       }
     }
 

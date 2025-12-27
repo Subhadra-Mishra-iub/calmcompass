@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface Message {
   role: 'user' | 'bot';
@@ -8,6 +9,7 @@ interface Message {
 }
 
 export default function Chatbot() {
+  const { data: session } = useSession();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
@@ -18,6 +20,11 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Don't render chatbot if user is not logged in
+  if (!session) {
+    return null;
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -160,7 +167,7 @@ export default function Chatbot() {
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md font-medium transition-colors"
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-white px-4 py-2 rounded-md font-medium transition-colors"
           >
             Send
           </button>
