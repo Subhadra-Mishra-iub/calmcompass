@@ -29,6 +29,7 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
   const [expandedEmotion, setExpandedEmotion] = useState<string | null>(null);
   const [editingAction, setEditingAction] = useState<string | null>(null);
   const [newAction, setNewAction] = useState({ title: '', description: '', url: '' });
+  const [expandedActions, setExpandedActions] = useState<Set<string>>(new Set());
 
   const fetchEmotions = useCallback(async () => {
     try {
@@ -230,15 +231,23 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
         <div className="space-y-4">
           {emotions.map((emotion) => (
             <div key={emotion.id} className="bg-white rounded-lg shadow border">
-              <div className="p-4 flex justify-between items-center">
+              <div className={`p-4 flex justify-between items-center ${emotion.actions.length > 0 ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''}`}>
                 <button
                   onClick={() => setExpandedEmotion(expandedEmotion === emotion.id ? null : emotion.id)}
                   className="flex-1 text-left"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">{emotion.name}</h3>
-                  <p className="text-sm text-gray-500">
-                    {emotion.actions.length} action{emotion.actions.length !== 1 ? 's' : ''}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-sm font-medium ${emotion.actions.length > 0 ? 'text-indigo-700' : 'text-gray-500'}`}>
+                      {emotion.actions.length === 0 ? (
+                        'No actions yet'
+                      ) : (
+                        <>
+                          <span className="font-semibold">{emotion.actions.length}</span> action{emotion.actions.length !== 1 ? 's' : ''} associated
+                        </>
+                      )}
+                    </span>
+                  </div>
                 </button>
                 <button
                   onClick={() => handleDeleteEmotion(emotion.id)}
@@ -251,10 +260,10 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
               {expandedEmotion === emotion.id && (
                 <div className="border-t p-4 space-y-3">
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium text-gray-900">Actions</h4>
+                    <h4 className="font-medium text-gray-900">Associated Actions</h4>
                     <button
                       onClick={() => setEditingAction(editingAction === emotion.id ? null : emotion.id)}
-                      className="text-indigo-600 hover:text-indigo-700 text-sm"
+                      className="text-indigo-600 hover:text-indigo-700 text-sm cursor-pointer"
                     >
                       {editingAction === emotion.id ? 'Cancel' : 'Add Action'}
                     </button>
@@ -285,7 +294,7 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
                       />
                       <button
                         onClick={() => handleAddAction(emotion.id)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm"
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm cursor-pointer"
                       >
                         Add Action
                       </button>
@@ -296,32 +305,65 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
                     <p className="text-sm text-gray-500">No actions yet. Add your first action!</p>
                   ) : (
                     <ul className="space-y-2">
-                      {emotion.actions.map((action) => (
-                        <li key={action.id} className="flex justify-between items-start p-3 bg-gray-50 rounded">
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{action.title}</div>
-                            {action.description && (
-                              <div className="text-sm text-gray-600 mt-1">{action.description}</div>
-                            )}
-                            {action.url && (
-                              <a
-                                href={action.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-indigo-600 hover:text-indigo-700 mt-1 inline-block"
-                              >
-                                {action.url}
-                              </a>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleDeleteAction(action.id)}
-                            className="text-red-600 hover:text-red-700 ml-4 text-sm"
-                          >
-                            Delete
-                          </button>
-                        </li>
-                      ))}
+                      {emotion.actions.map((action) => {
+                        const isExpanded = expandedActions.has(action.id);
+                        const hasMoreContent = action.description || action.url;
+                        const firstLine = action.description ? action.description.split('\n')[0] : '';
+                        
+                        return (
+                          <li key={action.id} className="flex justify-between items-start p-3 bg-gray-50 rounded border border-gray-200">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">{action.title}</div>
+                              {action.description && (
+                                <div className="text-sm text-gray-600 mt-1">
+                                  {isExpanded || !hasMoreContent ? (
+                                    action.description
+                                  ) : (
+                                    <>
+                                      {firstLine}
+                                      {action.description.length > firstLine.length && '...'}
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                              {action.url && (isExpanded || !action.description) && (
+                                <a
+                                  href={action.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-indigo-600 hover:text-indigo-700 mt-1 inline-block break-all"
+                                >
+                                  {action.url}
+                                </a>
+                              )}
+                              {hasMoreContent && (
+                                <button
+                                  onClick={() => {
+                                    setExpandedActions((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(action.id)) {
+                                        next.delete(action.id);
+                                      } else {
+                                        next.add(action.id);
+                                      }
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-sm text-indigo-600 hover:text-indigo-700 mt-2 cursor-pointer"
+                                >
+                                  {isExpanded ? 'Show less' : 'Show more'}
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleDeleteAction(action.id)}
+                              className="text-red-600 hover:text-red-700 ml-4 text-sm cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
