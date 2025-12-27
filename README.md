@@ -157,6 +157,29 @@ Comprehensive documentation is available in the `instructions/` directory:
 - ✅ HTTPS enforced in production (Vercel)
 - ⚠️ Never commit `.env` files or secrets to version control
 
+## Future Improvements
+
+This project is currently at MVP stage. Planned enhancements include:
+
+**High Priority:**
+- Edit functionality for emotions, actions, and check-ins
+- Delete check-ins capability
+- Last edited timestamps for all entities
+
+**Medium Priority:**
+- Statistics and analytics dashboard
+- Emotion trends over time visualization
+- Action completion rate tracking
+- Data export functionality (CSV/JSON)
+
+**Low Priority:**
+- Emotion colors and icons for visual representation
+- Daily check-in reminders
+- Dark mode theme toggle
+- Advanced search and filtering capabilities
+
+For more details on development decisions and future plans, see [instructions/06-development-notes.md](./instructions/06-development-notes.md).
+
 ## Contributing
 
 This is a personal project, but suggestions and feedback are welcome! Please feel free to open an issue or discussion.
