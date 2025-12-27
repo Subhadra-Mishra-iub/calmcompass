@@ -73,6 +73,12 @@ export async function POST(request: Request) {
     let context = '';
     
     if (mentionedEmotion) {
+      // Get actions associated with this emotion
+      const emotionActions = await db.action.findMany({
+        where: { emotionId: mentionedEmotion.id },
+        select: { title: true, description: true },
+      });
+
       const pastCheckIns = allCheckIns.filter(
         checkIn => checkIn.emotionId === mentionedEmotion!.id
       );
@@ -113,19 +119,35 @@ export async function POST(request: Request) {
           context += `Their previous notes when feeling this way: ${notes}. `;
         }
         
+        // Include actions associated with this emotion
+        if (emotionActions.length > 0) {
+          const actionTitles = emotionActions.map(a => a.title).join(', ');
+          context += `They have set up these actions for when they feel ${mentionedEmotion.name}: ${actionTitles}. `;
+        }
+        
         if (actionList.length > 0) {
-          context += `Actions they tried that helped: ${actionList.join(', ')}. `;
+          context += `Actions they tried that helped in the past: ${actionList.join(', ')}. `;
         }
         
         // Check if user wants more detail
         const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain') || messageLower.includes('elaborate');
         const wordLimit = wantsMoreDetail ? '150 words' : '60 words';
         
-        context += `Generate a warm, supportive response that: 1) Acknowledges their feeling, 2) Mentions the dates when they felt this way before, 3) References what helped them in the past (notes or actions), 4) Encourages them. Keep it conversational and personal, under ${wordLimit}. Only mention facts from their check-in history - do not make assumptions or suggestions beyond what is explicitly in their data.`;
+        context += `Generate a warm, supportive response that: 1) Acknowledges their feeling, 2) Mentions the dates when they felt this way before, 3) Suggests the actions they have set up for this emotion (${emotionActions.map(a => a.title).join(', ')}), 4) References what helped them in the past if available (notes or completed actions), 5) Encourages them. Keep it conversational and personal, under ${wordLimit}. Only mention facts from their data - do not make assumptions.`;
       } else {
+        // First time feeling this emotion - suggest actions they've set up
         const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain');
         const wordLimit = wantsMoreDetail ? '100 words' : '50 words';
-        context = `The user said they're feeling "${mentionedEmotion.name}" today. This is the first time they've checked in with this emotion recently (or first time in 60 days). Provide a warm, supportive response acknowledging their feeling and encouraging them. Keep it under ${wordLimit}. Be concise and only mention what is factually known.`;
+        
+        context = `The user said they're feeling "${mentionedEmotion.name}" today. This is their first check-in with this emotion. `;
+        
+        if (emotionActions.length > 0) {
+          const actionTitles = emotionActions.map(a => a.title).join(', ');
+          context += `They have set up these actions for when they feel ${mentionedEmotion.name}: ${actionTitles}. `;
+          context += `Suggest they try these actions. `;
+        }
+        
+        context += `Provide a warm, supportive response acknowledging their feeling and encouraging them. Keep it under ${wordLimit}. Be concise and only mention what is factually known.`;
       }
     } else {
       // No emotion mentioned - analyze overall patterns
@@ -162,8 +184,9 @@ export async function POST(request: Request) {
     
     if (!groqApiKey) {
       // Fallback to rule-based response if no API key
+      const fallbackResponse = await generateFallbackResponse(mentionedEmotion, allCheckIns, emotions);
       return NextResponse.json({
-        response: generateFallbackResponse(mentionedEmotion, allCheckIns, emotions),
+        response: fallbackResponse,
         source: 'rule-based',
       });
     }
@@ -206,8 +229,9 @@ export async function POST(request: Request) {
     } catch (groqError) {
       console.error('Groq API error:', groqError);
       // Fallback to rule-based response
+      const fallbackResponse = await generateFallbackResponse(mentionedEmotion, allCheckIns, emotions);
       return NextResponse.json({
-        response: generateFallbackResponse(mentionedEmotion, allCheckIns, emotions),
+        response: fallbackResponse,
         source: 'rule-based-fallback',
       });
     }
@@ -220,21 +244,31 @@ export async function POST(request: Request) {
   }
 }
 
-function generateFallbackResponse(
+async function generateFallbackResponse(
   mentionedEmotion: { id: string; name: string } | null,
   allCheckIns: any[],
   emotions: any[]
-): string {
+): Promise<string> {
   if (!mentionedEmotion) {
     return "I'm here to help! Try mentioning how you're feeling (like 'I'm feeling happy' or 'I'm feeling sad') and I can provide personalized suggestions based on your past check-ins.";
   }
+
+  // Get actions associated with this emotion
+  const emotionActions = await db.action.findMany({
+    where: { emotionId: mentionedEmotion.id },
+    select: { title: true },
+  });
 
   const pastCheckIns = allCheckIns.filter(
     checkIn => checkIn.emotionId === mentionedEmotion.id
   );
 
   if (pastCheckIns.length === 0) {
-    return `I see you're feeling ${mentionedEmotion.name} today. This is the first time you've checked in with this emotion recently. Consider trying some of the actions you've set up for this emotion - they can really help!`;
+    if (emotionActions.length > 0) {
+      const actionTitles = emotionActions.map(a => a.title).join(', ');
+      return `I see you're feeling ${mentionedEmotion.name} today. This is your first check-in with this emotion. You have set up these actions for when you feel ${mentionedEmotion.name}: ${actionTitles}. Consider trying one of these - they can really help!`;
+    }
+    return `I see you're feeling ${mentionedEmotion.name} today. This is your first check-in with this emotion. Consider setting up some actions for this emotion that might help you feel better!`;
   }
 
   const formatDate = (date: Date) => {
@@ -249,19 +283,25 @@ function generateFallbackResponse(
     .map(checkIn => formatDate(checkIn.createdAt))
     .join(', ');
 
-  const completedActions = new Set<string>();
-  pastCheckIns.forEach(checkIn => {
-    checkIn.checkInActions
-      .filter((cia: any) => cia.completed)
-      .forEach((cia: any) => {
-        completedActions.add(cia.action.title);
-      });
-  });
-  const actionList = Array.from(completedActions).slice(0, 3);
+    const completedActions = new Set<string>();
+    pastCheckIns.forEach(checkIn => {
+      checkIn.checkInActions
+        .filter((cia: any) => cia.completed)
+        .forEach((cia: any) => {
+          completedActions.add(cia.action.title);
+        });
+    });
+    const actionList = Array.from(completedActions).slice(0, 3);
 
-  const emotionLower = mentionedEmotion.name.toLowerCase();
-  
-  if (emotionLower.includes('happy') || emotionLower.includes('joy') || emotionLower.includes('good')) {
+    // Get actions associated with this emotion for fallback
+    const emotionActions = await db.action.findMany({
+      where: { emotionId: mentionedEmotion.id },
+      select: { title: true },
+    });
+
+    const emotionLower = mentionedEmotion.name.toLowerCase();
+    
+    if (emotionLower.includes('happy') || emotionLower.includes('joy') || emotionLower.includes('good')) {
     let response = `Great to hear you're feeling ${mentionedEmotion.name} today! `;
     if (pastCheckIns.length > 1) {
       response += `You felt ${mentionedEmotion.name} on ${dates} too. `;
@@ -284,10 +324,15 @@ function generateFallbackResponse(
     if (pastCheckIns.length > 1) {
       response += `You felt ${mentionedEmotion.name} on ${dates} too. `;
     }
-    if (actionList.length > 0) {
+    
+    // Prioritize suggesting actions they've set up for this emotion
+    if (emotionActions.length > 0) {
+      const actionTitles = emotionActions.map(a => a.title).join(', ');
+      response += `You have set up these actions for when you feel ${mentionedEmotion.name}: ${actionTitles}. Consider trying one of these!`;
+    } else if (actionList.length > 0) {
       response += `You tried ${actionList.join(', ')} on those days. Those might be helpful now as well.`;
     } else {
-      response += `Consider trying some of the actions you've set up for this emotion.`;
+      response += `Consider setting up some actions for this emotion that might help you feel better.`;
     }
     return response;
   }

@@ -31,8 +31,8 @@ export default function Chatbot() {
     }
   }, [messages, session]);
 
-  // Don't render chatbot if session is loading or user is not logged in
-  if (status === 'loading' || !session) {
+  // Don't render chatbot if session is loading or user is not authenticated
+  if (status !== 'authenticated' || !session) {
     return null;
   }
 
