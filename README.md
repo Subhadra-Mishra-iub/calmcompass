@@ -1,6 +1,6 @@
 # CalmCompass
 
-> **🌐 Live Website**: [Visit CalmCompass](https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app)
+> **🌐 Live Website**: [Visit CalmCompass](https://calmcompass.vercel.app/)
 
 A modern web application designed to help individuals track their emotional well-being through daily check-ins, personalized emotion management, and actionable insights.
 
@@ -135,7 +135,7 @@ See `prisma/schema.prisma` for the complete schema definition.
 
 The application is designed to be deployed to Vercel (hosting) and Supabase (database), both offering generous free tiers.
 
-**🌐 Live Website**: [https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app](https://calmcompass-4ptph6i5s-subhadra-mishra-iubs-projects.vercel.app)
+**🌐 Live Website**: [https://calmcompass.vercel.app/](https://calmcompass.vercel.app/)
 
 For detailed deployment instructions, see [instructions/04-deployment-guide.md](./instructions/04-deployment-guide.md).
 
