@@ -31,9 +31,14 @@ export default function Chatbot() {
     }
   }, [messages, session]);
 
-  // Don't render chatbot if session is loading or user is not authenticated
+  // Show chatbot only when authenticated (don't show during loading or when unauthenticated)
+  // We check status === 'authenticated' to ensure session is fully loaded
+  if (status === 'loading') {
+    return null; // Still loading, don't show yet
+  }
+
   if (status !== 'authenticated' || !session) {
-    return null;
+    return null; // Not authenticated, don't show
   }
 
   const handleSend = async () => {
