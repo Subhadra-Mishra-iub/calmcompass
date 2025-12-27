@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import CheckInModal from '@/components/CheckInModal';
 import CheckInButton from '@/components/CheckInButton';
+import Chatbot from '@/components/Chatbot';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
         </div>
         <CheckInButton userId={session.user.id} />
       </main>
+      <Chatbot />
     </div>
   );
 }
