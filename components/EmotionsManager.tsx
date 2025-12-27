@@ -32,7 +32,7 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
 
   useEffect(() => {
     fetchEmotions();
-  }, []);
+  }, [userId]);
 
   const fetchEmotions = async () => {
     try {
