@@ -135,9 +135,15 @@ export async function POST(request: Request) {
           context += `Actions they tried that helped: ${actionList.join(', ')}. `;
         }
         
-        context += `Generate a warm, supportive response that: 1) Acknowledges their feeling, 2) Mentions the dates when they felt this way before, 3) References what helped them in the past (notes or actions), 4) Encourages them. Keep it conversational and personal, under 150 words.`;
+        // Check if user wants more detail
+        const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain') || messageLower.includes('elaborate');
+        const wordLimit = wantsMoreDetail ? '150 words' : '60 words';
+        
+        context += `Generate a warm, supportive response that: 1) Acknowledges their feeling, 2) Mentions the dates when they felt this way before, 3) References what helped them in the past (notes or actions), 4) Encourages them. Keep it conversational and personal, under ${wordLimit}. Only mention facts from their check-in history - do not make assumptions or suggestions beyond what is explicitly in their data.`;
       } else {
-        context = `The user said they're feeling "${mentionedEmotion.name}" today. This is the first time they've checked in with this emotion recently (or first time in 60 days). Provide a warm, supportive response acknowledging their feeling and encouraging them. Keep it under 100 words.`;
+        const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain');
+        const wordLimit = wantsMoreDetail ? '100 words' : '50 words';
+        context = `The user said they're feeling "${mentionedEmotion.name}" today. This is the first time they've checked in with this emotion recently (or first time in 60 days). Provide a warm, supportive response acknowledging their feeling and encouraging them. Keep it under ${wordLimit}. Be concise and only mention what is factually known.`;
       }
     } else {
       // No emotion mentioned - analyze overall patterns
@@ -161,9 +167,11 @@ export async function POST(request: Request) {
         if (mostCommonEmotion && maxCount >= 3) {
           context += `They've been feeling "${mostCommonEmotion}" frequently (${maxCount} times recently). `;
         }
-        context += `Generate a helpful, supportive response. Keep it conversational and under 100 words.`;
+        const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain');
+        const wordLimit = wantsMoreDetail ? '100 words' : '50 words';
+        context += `Generate a helpful, supportive response. Keep it conversational and under ${wordLimit}. Be concise and fact-based.`;
       } else {
-        context = `User message: "${message}". This user has no check-in history yet. Welcome them and encourage them to start tracking their emotions. Keep it friendly and under 80 words.`;
+        context = `User message: "${message}". This user has no check-in history yet. Welcome them and encourage them to start tracking their emotions. Keep it friendly and under 50 words. Be concise.`;
       }
     }
 
@@ -190,7 +198,7 @@ export async function POST(request: Request) {
           messages: [
             {
               role: 'system',
-              content: 'You are a warm, empathetic emotional wellness assistant for CalmCompass. You help users understand their emotional patterns and provide supportive, personalized guidance based on their check-in history. Be conversational, supportive, and encouraging. Keep responses concise (under 150 words).',
+              content: 'You are a warm, empathetic emotional wellness assistant for CalmCompass. You help users understand their emotional patterns and provide supportive, personalized guidance based on their check-in history. Be conversational, supportive, and encouraging. Keep responses concise and brief (2-4 sentences typically). Only mention facts from their check-in history - do not make assumptions or provide unsolicited advice beyond what is in their data. If they ask for more detail, you can expand, but default to being brief.',
             },
             {
               role: 'user',
@@ -198,7 +206,7 @@ export async function POST(request: Request) {
             },
           ],
           temperature: 0.7,
-          max_tokens: 200,
+          max_tokens: messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain') ? 150 : 80,
         }),
       });
 
