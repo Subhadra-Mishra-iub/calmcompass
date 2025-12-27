@@ -14,6 +14,7 @@ interface Action {
   title: string;
   description: string | null;
   url: string | null;
+  createdAt: string;
 }
 
 interface EmotionsManagerProps {
@@ -310,10 +311,31 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
                         const hasMoreContent = action.description || action.url;
                         const firstLine = action.description ? action.description.split('\n')[0] : '';
                         
+                        const formatDate = (dateString: string) => {
+                          const date = new Date(dateString);
+                          const now = new Date();
+                          const diffTime = Math.abs(now.getTime() - date.getTime());
+                          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                          
+                          if (diffDays === 0) {
+                            return 'Added today';
+                          } else if (diffDays === 1) {
+                            return 'Added yesterday';
+                          } else if (diffDays < 7) {
+                            return `Added ${diffDays} days ago`;
+                          } else {
+                            return `Added ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })}`;
+                          }
+                        };
+                        
                         return (
                           <li key={action.id} className="flex justify-between items-start p-3 bg-gray-50 rounded border border-gray-200">
                             <div className="flex-1">
-                              <div className="font-medium text-gray-900">{action.title}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium text-gray-900">{action.title}</div>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-500">{formatDate(action.createdAt)}</span>
+                              </div>
                               {action.description && (
                                 <div className="text-sm text-gray-600 mt-1">
                                   {isExpanded || !hasMoreContent ? (
