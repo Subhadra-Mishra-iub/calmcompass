@@ -38,12 +38,20 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
       // Fetch actions for each emotion
       const emotionsWithActions = await Promise.all(
         (data.emotions || []).map(async (emotion: { id: string; name: string }) => {
-          const actionsResponse = await fetch(`/api/actions?emotionId=${emotion.id}`);
-          const actionsData = await actionsResponse.json();
-          return {
-            ...emotion,
-            actions: actionsData.actions || [],
-          };
+          try {
+            const actionsResponse = await fetch(`/api/actions?emotionId=${emotion.id}`);
+            const actionsData = await actionsResponse.json();
+            return {
+              ...emotion,
+              actions: actionsData.actions || [],
+            };
+          } catch (error) {
+            console.error(`Error fetching actions for emotion ${emotion.id}:`, error);
+            return {
+              ...emotion,
+              actions: [],
+            };
+          }
         })
       );
       
@@ -123,7 +131,8 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
       if (response.ok) {
         setNewAction({ title: '', description: '', url: '' });
         setEditingAction(null);
-        fetchEmotions();
+        // Refresh emotions and actions
+        await fetchEmotions();
       } else {
         const data = await response.json();
         alert(data.error || 'Failed to create action');
