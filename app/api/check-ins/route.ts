@@ -18,12 +18,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify user
     if (userId !== session.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Verify emotion belongs to user
     const emotion = await db.emotion.findUnique({
       where: { id: emotionId },
     });
@@ -32,7 +30,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Emotion not found' }, { status: 404 });
     }
 
-    // Create check-in
     const checkIn = await db.checkIn.create({
       data: {
         userId: session.user.id,
@@ -64,5 +61,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
 
 

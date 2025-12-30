@@ -100,7 +100,6 @@ export default function CheckInModal({ isOpen, onClose, onComplete, userId }: Ch
         throw new Error('Failed to save check-in');
       }
 
-      // Reset form
       setSelectedEmotionId('');
       setNotes('');
       setCompletedActions(new Set());

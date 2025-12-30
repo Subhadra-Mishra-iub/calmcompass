@@ -15,7 +15,6 @@ export async function PUT(
     const { id } = await params;
     const { title, description, url } = await request.json();
 
-    // Verify action belongs to user's emotion
     const action = await db.action.findUnique({
       where: { id },
       include: { emotion: true },
@@ -87,5 +86,7 @@ export async function DELETE(
     );
   }
 }
+
+
 
 

@@ -17,7 +17,6 @@ export default function SignupPage() {
     setError('');
     setLoading(true);
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');

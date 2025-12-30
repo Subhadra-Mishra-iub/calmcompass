@@ -14,7 +14,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Verify emotion belongs to user
     const emotion = await db.emotion.findUnique({
       where: { id },
     });
@@ -40,5 +39,7 @@ export async function DELETE(
     );
   }
 }
+
+
 
 

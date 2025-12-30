@@ -31,8 +31,6 @@ export default function Chatbot() {
     }
   }, [messages, session]);
 
-  // Show chatbot ONLY when status is exactly 'authenticated' AND session exists
-  // Hide it on login, signup, home pages, or any unauthenticated state
   if (status !== 'authenticated') {
     return null;
   }

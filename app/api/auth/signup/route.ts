@@ -13,7 +13,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -29,7 +28,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
@@ -38,10 +36,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create user
     await createUser(email, name, password);
 
-    // Sign in the user
     await signIn('credentials', {
       email,
       password,

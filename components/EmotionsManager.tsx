@@ -41,7 +41,6 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
       }
       const data = await response.json();
       
-      // Fetch actions for each emotion
       const emotionsWithActions = await Promise.all(
         (data.emotions || []).map(async (emotion: { id: string; name: string }) => {
           try {
@@ -144,7 +143,6 @@ export default function EmotionsManager({ userId }: EmotionsManagerProps) {
       if (response.ok) {
         setNewAction({ title: '', description: '', url: '' });
         setEditingAction(null);
-        // Refresh emotions and actions
         await fetchEmotions();
       } else {
         const data = await response.json();

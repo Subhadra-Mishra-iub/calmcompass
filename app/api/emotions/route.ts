@@ -12,7 +12,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId') || session.user.id;
 
-    // Verify user can only access their own emotions
     if (userId !== session.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -48,7 +47,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if emotion with this name already exists for user
     const existing = await db.emotion.findFirst({
       where: {
         userId: session.user.id,
@@ -79,5 +77,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
 
 

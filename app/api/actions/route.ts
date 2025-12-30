@@ -19,7 +19,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Verify emotion belongs to user
     const emotion = await db.emotion.findUnique({
       where: { id: emotionId },
     });
@@ -63,7 +62,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify emotion belongs to user
     const emotion = await db.emotion.findUnique({
       where: { id: emotionId },
     });
@@ -94,5 +92,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
 
 

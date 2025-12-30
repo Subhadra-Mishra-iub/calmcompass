@@ -27,12 +27,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user's emotions
     const emotions = await db.emotion.findMany({
       where: { userId },
     });
 
-    // Get user's check-ins (last 60 days)
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
@@ -52,28 +50,20 @@ export async function POST(request: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Extract emotion from message - ONLY check emotions that exist in user's profile
     const messageLower = message.toLowerCase();
     let mentionedEmotion: { id: string; name: string } | null = null;
     
-    // Only try to find exact emotion match from user's actual emotions
     for (const emotion of emotions) {
       const emotionNameLower = emotion.name.toLowerCase();
-      // Check if message contains the emotion name
       if (messageLower.includes(emotionNameLower)) {
         mentionedEmotion = emotion;
         break;
       }
     }
 
-    // Note: We removed the keyword matching fallback to prevent false assumptions
-    // We only respond about emotions that actually exist in the user's profile
-
-    // Prepare context for AI
     let context = '';
     
     if (mentionedEmotion) {
-      // Get actions associated with this emotion
       const emotionActions = await db.action.findMany({
         where: { emotionId: mentionedEmotion.id },
         select: { title: true, description: true },
@@ -119,7 +109,6 @@ export async function POST(request: Request) {
           context += `Their previous notes when feeling this way: ${notes}. `;
         }
         
-        // Include actions associated with this emotion
         if (emotionActions.length > 0) {
           const actionTitles = emotionActions.map(a => a.title).join(', ');
           context += `They have set up these actions for when they feel ${mentionedEmotion.name}: ${actionTitles}. `;
@@ -129,13 +118,11 @@ export async function POST(request: Request) {
           context += `Actions they tried that helped in the past: ${actionList.join(', ')}. `;
         }
         
-        // Check if user wants more detail
         const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain') || messageLower.includes('elaborate');
         const wordLimit = wantsMoreDetail ? '150 words' : '60 words';
         
         context += `Generate a warm, supportive response that: 1) Acknowledges their feeling, 2) Mentions the dates when they felt this way before, 3) Suggests the actions they have set up for this emotion (${emotionActions.map(a => a.title).join(', ')}), 4) References what helped them in the past if available (notes or completed actions), 5) Encourages them. Keep it conversational and personal, under ${wordLimit}. Only mention facts from their data - do not make assumptions.`;
       } else {
-        // First time feeling this emotion - suggest actions they've set up
         const wantsMoreDetail = messageLower.includes('more') || messageLower.includes('detail') || messageLower.includes('explain');
         const wordLimit = wantsMoreDetail ? '100 words' : '50 words';
         
@@ -150,7 +137,6 @@ export async function POST(request: Request) {
         context += `Provide a warm, supportive response acknowledging their feeling and encouraging them. Keep it under ${wordLimit}. Be concise and only mention what is factually known.`;
       }
     } else {
-      // No emotion mentioned - analyze overall patterns
       if (allCheckIns.length > 0) {
         const emotionCounts = new Map<string, number>();
         allCheckIns.forEach(checkIn => {
@@ -179,11 +165,9 @@ export async function POST(request: Request) {
       }
     }
 
-    // Call Groq API
     const groqApiKey = process.env.GROQ_API_KEY;
     
     if (!groqApiKey) {
-      // Fallback to rule-based response if no API key
       const fallbackResponse = await generateFallbackResponse(mentionedEmotion, allCheckIns, emotions);
       return NextResponse.json({
         response: fallbackResponse,
@@ -228,7 +212,6 @@ export async function POST(request: Request) {
       });
     } catch (groqError) {
       console.error('Groq API error:', groqError);
-      // Fallback to rule-based response
       const fallbackResponse = await generateFallbackResponse(mentionedEmotion, allCheckIns, emotions);
       return NextResponse.json({
         response: fallbackResponse,
@@ -253,7 +236,6 @@ async function generateFallbackResponse(
     return "I'm here to help! Try mentioning how you're feeling (like 'I'm feeling happy' or 'I'm feeling sad') and I can provide personalized suggestions based on your past check-ins.";
   }
 
-  // Get actions associated with this emotion
   const emotionActions = await db.action.findMany({
     where: { emotionId: mentionedEmotion.id },
     select: { title: true },
@@ -319,7 +301,6 @@ async function generateFallbackResponse(
       response += `You felt ${mentionedEmotion.name} on ${dates} too. `;
     }
     
-    // Prioritize suggesting actions they've set up for this emotion
     if (emotionActions.length > 0) {
       const actionTitles = emotionActions.map(a => a.title).join(', ');
       response += `You have set up these actions for when you feel ${mentionedEmotion.name}: ${actionTitles}. Consider trying one of these!`;

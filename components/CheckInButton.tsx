@@ -13,7 +13,6 @@ export default function CheckInButton({ userId }: CheckInButtonProps) {
 
   const handleComplete = () => {
     setRefreshKey((prev) => prev + 1);
-    // Optionally refresh the page or update data
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
@@ -39,5 +38,7 @@ export default function CheckInButton({ userId }: CheckInButtonProps) {
     </>
   );
 }
+
+
 
 
